@@ -11,7 +11,7 @@
 
   // Conectar al ESP32 vía WebSocket
   connectBtn.addEventListener('click', () => {
-    const socket = new WebSocket("ws://<IP_DEL_ESP32>/ws");
+    const socket = new WebSocket("wss://192.168.1.88/wss");
 
     socket.onopen = () => {
       console.log("Conectado al ESP32");
