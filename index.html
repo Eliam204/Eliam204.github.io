@@ -6,7 +6,7 @@
     <title>Ojo de Calor</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        /* Estilos básicos */
+        /* Estilo base */
         * {
             margin: 0;
             padding: 0;
@@ -16,30 +16,28 @@
         body {
             font-family: 'Inter', sans-serif;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: linear-gradient(to bottom, #e6e9f0, #eef1f5);
+            background: linear-gradient(to bottom, #f7f8fc, #e1e8f0);
             color: #333;
-            overflow: hidden;
         }
 
-        /* Estilo del contenedor principal */
         .container {
             text-align: center;
-            max-width: 600px;
-            padding: 20px;
-            background-color: white;
+            padding: 30px 20px;
+            background-color: #fff;
             border-radius: 15px;
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
         }
 
         h1 {
             font-size: 2.5rem;
             font-weight: 600;
             color: #4CAF50;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
 
         p {
@@ -48,7 +46,6 @@
             margin-bottom: 30px;
         }
 
-        /* Estilo del botón */
         .btn-connect {
             display: inline-block;
             background-color: #4CAF50;
@@ -74,12 +71,10 @@
             transform: translateY(1px);
         }
 
-        /* Estado de conexión */
         .status {
             margin-top: 20px;
             font-size: 1rem;
             font-weight: 500;
-            color: #333;
         }
 
         .status.success {
@@ -90,37 +85,31 @@
             color: #FF5252;
         }
 
-        /* Fondo decorativo */
-        .background-decor {
-            position: absolute;
-            top: -50px;
-            right: -50px;
-            width: 200px;
-            height: 200px;
-            background-color: #4CAF50;
-            opacity: 0.1;
-            border-radius: 50%;
-            z-index: -1;
+        .footer {
+            margin-top: 40px;
+            font-size: 0.9rem;
+            color: #aaa;
         }
 
-        .background-decor.bottom {
-            top: auto;
-            bottom: -50px;
-            left: -50px;
-            background-color: #2196F3;
+        .footer a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <!-- Elementos decorativos -->
-    <div class="background-decor"></div>
-    <div class="background-decor bottom"></div>
-
     <div class="container">
         <h1>Ojo de Calor</h1>
-        <p>Conecta tu dispositivo Bluetooth para monitorear temperaturas en tiempo real.</p>
+        <p>Monitorea las temperaturas en tiempo real conectando tu dispositivo Bluetooth.</p>
         <button class="btn-connect" id="connectBtn">Conectar a Bluetooth</button>
         <p class="status" id="status">Estado: No conectado</p>
+        <div class="footer">
+            <p>Desarrollado por <a href="https://eliam204.github.io/" target="_blank">El equipo de Ojo de Calor</a></p>
+        </div>
     </div>
 
     <script>
@@ -133,15 +122,12 @@
                 statusText.classList.remove('success', 'error');
 
                 const device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true,
-                    optionalServices: ['battery_service'] // Cambia según el servicio que desees
+                    acceptAllDevices: true
                 });
 
-                statusText.textContent = `Conectado a ${device.name}`;
+                statusText.textContent = `Conectado a ${device.name || "dispositivo"}`;
                 statusText.classList.add('success');
                 console.log('Dispositivo conectado:', device);
-
-                // Aquí puedes manejar datos del dispositivo
             } catch (error) {
                 console.error(error);
                 statusText.textContent = "No se pudo conectar. Intenta nuevamente.";
@@ -151,3 +137,4 @@
     </script>
 </body>
 </html>
+
