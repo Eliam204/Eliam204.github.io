@@ -3,138 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ojo de Calor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <title>Ojo de Calor - Monitor</title>
     <style>
-        /* Estilo base */
-        * {
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            background: #f5f5f5;
         }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(to bottom, #f7f8fc, #e1e8f0);
-            color: #333;
-        }
-
         .container {
-            text-align: center;
-            padding: 30px 20px;
-            background-color: #fff;
-            border-radius: 15px;
-            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
-            width: 90%;
+            margin: 50px auto;
             max-width: 500px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
         }
-
         h1 {
-            font-size: 2.5rem;
-            font-weight: 600;
             color: #4CAF50;
-            margin-bottom: 20px;
         }
-
-        p {
-            font-size: 1.1rem;
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        .btn-connect {
-            display: inline-block;
-            background-color: #4CAF50;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 50px;
-            text-transform: uppercase;
-            font-size: 1rem;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-connect:hover {
-            background-color: #45a049;
-            box-shadow: 0px 12px 20px rgba(0, 0, 0, 0.2);
-            transform: translateY(-3px);
-        }
-
-        .btn-connect:active {
-            transform: translateY(1px);
-        }
-
-        .status {
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 5px;
             margin-top: 20px;
-            font-size: 1rem;
-            font-weight: 500;
         }
-
-        .status.success {
-            color: #4CAF50;
-        }
-
-        .status.error {
-            color: #FF5252;
-        }
-
-        .footer {
-            margin-top: 40px;
-            font-size: 0.9rem;
-            color: #aaa;
-        }
-
-        .footer a {
-            color: #4CAF50;
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
+        .cell {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #eee;
+            border-radius: 5px;
+            font-size: 0.8rem;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Ojo de Calor</h1>
-        <p>Monitorea las temperaturas en tiempo real conectando tu dispositivo Bluetooth.</p>
-        <button class="btn-connect" id="connectBtn">Conectar a Bluetooth</button>
-        <p class="status" id="status">Estado: No conectado</p>
-        <div class="footer">
-            <p>Desarrollado por <a href="https://eliam204.github.io/" target="_blank">El equipo de Ojo de Calor</a></p>
-        </div>
+        <p>Visualización de datos en tiempo real</p>
+        <button id="connectBtn">Conectar al ESP32</button>
+        <div class="grid" id="grid"></div>
     </div>
 
     <script>
         const connectBtn = document.getElementById('connectBtn');
-        const statusText = document.getElementById('status');
+        const grid = document.getElementById('grid');
 
-        connectBtn.addEventListener('click', async () => {
-            try {
-                statusText.textContent = "Buscando dispositivos...";
-                statusText.classList.remove('success', 'error');
+        // Crear las celdas para la visualización
+        for (let i = 0; i < 64; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            grid.appendChild(cell);
+        }
 
-                const device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true
+        // Conectar al ESP32 vía WebSocket
+        connectBtn.addEventListener('click', () => {
+            const socket = new WebSocket("ws://<IP_DEL_ESP32>/ws");
+
+            socket.onopen = () => {
+                console.log("Conectado al ESP32");
+                connectBtn.textContent = "Conectado";
+                connectBtn.disabled = true;
+            };
+
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                const cells = document.querySelectorAll('.cell');
+                data.forEach((temp, i) => {
+                    cells[i].textContent = temp.toFixed(1);
+                    const intensity = Math.min(255, Math.max(0, (temp - 20) * 10)); // Escala para colores
+                    cells[i].style.backgroundColor = `rgb(${intensity}, 0, ${255 - intensity})`;
                 });
+            };
 
-                statusText.textContent = `Conectado a ${device.name || "dispositivo"}`;
-                statusText.classList.add('success');
-                console.log('Dispositivo conectado:', device);
-            } catch (error) {
-                console.error(error);
-                statusText.textContent = "No se pudo conectar. Intenta nuevamente.";
-                statusText.classList.add('error');
-            }
+            socket.onclose = () => {
+                console.log("Desconectado del ESP32");
+                connectBtn.textContent = "Conectar al ESP32";
+                connectBtn.disabled = false;
+            };
+
+            socket.onerror = (error) => {
+                console.error("Error en WebSocket", error);
+            };
         });
     </script>
 </body>
 </html>
-
